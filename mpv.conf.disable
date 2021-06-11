@@ -2,7 +2,6 @@
 border=no
 msg-color=yes
 msg-module=yes
-input-ipc-server=/tmp/mpvsocket
 
 # Screenshots #                    
 screenshot-template="%x\Screens\Screenshot-%F-T%wH.%wM.%wS.%wT-F%{estimated-frame-number}"
@@ -37,7 +36,7 @@ embeddedfonts=yes						# use embedded fonts for SSA/ASS subs
 sub-fix-timing=no                       # do not try to fix gaps (which might make it worse in some cases). Enable if there are scenebleeds.
 
 # Audio #
-ao=coreaudio
+volume-max=200                          # maximum volume in %, everything above 100 results in amplification
 audio-stream-silence                    # fix audio popping on random seek
 audio-file-auto=fuzzy                   # external audio doesn't has to match the file name exactly to autoload
 audio-pitch-correction=yes              # automatically insert scaletempo when playing with higher speed
@@ -48,31 +47,47 @@ slang=eng,en,und,de,ger,jp,jap
 
 # Video Profiles #
 
+[vo]
 dither=error-diffusion
 deband=yes
-deband-iterations=1
+deband-iterations=2
 deband-threshold=20
 deband-range=16
-# scale=ewa_lanczossharp
-# scale-clamp=0.2
-# cscale=ewa_lanczossharp
+# scale=haasnsoft
+scale-clamp=0.2
+# cscale=ewa_lanczos
 correct-downscaling=yes
 linear-downscaling=yes
 sigmoid-upscaling=yes
 video-sync=display-resample
-tscale=box
-tscale-window=quadric
-tscale-radius=1.1
-tscale-clamp=0.0
+tscale=oversample
 interpolation
 blend-subtitles=no
 hdr-compute-peak=yes
 tone-mapping=mobius
-# vo=libmpv
+
+[vulkan]
+gpu-api=vulkan
 hwdec=no
+vulkan-async-compute=yes
+vulkan-async-transfer=yes
+vulkan-queue-count=1
+
+[video]
+profile=vo
+profile=vulkan
+autofit=85%x85%
+
+[video-mac]
+profile=vo
+vo=libmpv
 target-prim=apple
 gpu-api=opengl
 opengl-pbo=yes
+deband-iterations=1
+ao=coreaudio
+hdr-compute-peak=yes
+tone-mapping=mobius
 
 [protocol.file]
 network-timeout=0
@@ -95,3 +110,57 @@ profile=protocol-network
 
 [protocol.https]
 profile=protocol-network
+
+[shader-ultra-liveaction]
+glsl-shaders-clr
+glsl-shader="~~/shaders/FSRCNNX_x2_8-0-4-1.glsl"
+glsl-shader="~~/shaders/sssr.glsl"
+
+[shader-ultra-anime]
+glsl-shaders-clr
+glsl-shader="~~/shaders/Anime4K_Upscale_CNN_L_x2_Deblur.glsl"
+glsl-shader="~~/shaders/Anime4K_Auto_Downscale_Pre_x4.glsl"
+glsl-shader="~~/shaders/Anime4K_ThinLines_HQ.glsl"
+glsl-shader="~~/shaders/Anime4K_DarkLines_HQ.glsl"
+glsl-shader="~~/shaders/Anime4K_Denoise_Bilateral_Mode.glsl"
+glsl-shader="~~/shaders/grain.glsl"
+
+[shader-medium-anime]
+glsl-shaders-clr
+glsl-shader="~~/shaders/Anime4K_Upscale_CNN_M_x2_Deblur.glsl"
+glsl-shader="~~/shaders/Anime4K_ThinLines_Fast.glsl"
+glsl-shader="~~/shaders/Anime4K_DarkLines_Fast.glsl"
+glsl-shader="~~/shaders/Anime4K_Denoise_Bilateral_Mode.glsl"
+
+[shader-low-anime]
+glsl-shaders-clr
+glsl-shader="~~/shaders/Anime4K_Upscale_DTD_x2.glsl"
+glsl-shader="~~/shaders/Anime4K_ThinLines_VeryFast.glsl"
+glsl-shader="~~/shaders/Anime4K_DarkLines_VeryFast.glsl"
+
+[shaders-simple]    # Simple Upscaling. its the fastest out of the bunch, and works everywhere reliably. if you watch mixed content, use this.
+glsl-shaders-clr
+glsl-shader="~~/shaders/sssr.glsl"
+glsl-shader="~~/shaders/Anime4K_Denoise_Bilateral_Mode.glsl"
+glsl-shader="~~/shaders/grain.glsl"
+
+[shaders-test]
+glsl-shaders-clr
+glsl-shader="~~/shaders/sssr.glsl"
+glsl-shader="~~/shaders/Anime4K_Denoise_Heavy_CNN_L.glsl"
+glsl-shader="~~/shaders/Anime4K_ThinLines_HQ.glsl"
+glsl-shader="~~/shaders/Anime4K_DarkLines_HQ.glsl"
+glsl-shader="~~/shaders/grain.glsl"
+
+[default]    
+
+# profile=video              # For Windows and Linux    
+profile=video-mac          # For Macs
+
+# profile=shaders-test # Heavy Denoise - will reduce performance by probably alot.
+
+# profile=shaders-simple
+# profile=shader-low-anime
+# profile=shader-medium-anime
+# profile=shader-ultra-anime
+# profile=shader-ultra-liveaction
